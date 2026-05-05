@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "Bug": {
+      "title": "Bug Report",
+      "description": "A report of a bug found in the application.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the bug report."
+        },
+        "description": {
+          "type": "string",
+          "description": "The detailed description of the bug."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "in-progress", "completed"],
+          "description": "The current status of the bug."
+        },
+        "fileData": {
+          "type": "string",
+          "description": "Base64 encoded file data."
+        },
+        "fileName": {
+          "type": "string",
+          "description": "The name of the attached file."
+        },
+        "fileType": {
+          "type": "string",
+          "description": "The MIME type of the attached file."
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp of when the bug was reported."
+        },
+        "reporterEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Email of the user who reported the bug."
+        },
+        "reporterName": {
+          "type": "string",
+          "description": "Name of the user who reported the bug."
+        }
+      },
+      "required": ["title", "description", "status", "createdAt", "reporterEmail", "reporterName"]
+    }
+  },
+  "firestore": {
+    "/bugs/{bugId}": {
+      "schema": "Bug",
+      "description": "Collection of bug reports."
+    }
+  }
+}

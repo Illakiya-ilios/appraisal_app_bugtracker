@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: bugs
+    // Fields:
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - status: string (required, enum: ['pending', 'in-progress', 'completed'])
+    //   - fileData: string (optional, base64)
+    //   - fileName: string (optional)
+    //   - fileType: string (optional)
+    //   - createdAt: number (required)
+    //   - reporterEmail: string (required, email)
+    //   - reporterName: string (required)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+      function isAdmin() {
+      let admins = ["noilakin14@gmail.com"]; // Add more emails here
+      return isAuthenticated() && (
+        request.auth.token.email in admins && 
+        request.auth.token.email_verified == true
+      );
+    }
+
+    function isOwner(email) {
+      return isAuthenticated() && request.auth.token.email == email;
+    }
+
+    function isValidBug(data) {
+      return data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() > 0 && data.description.size() < 5000 &&
+             data.status in ['pending', 'in-progress', 'completed'] &&
+             data.createdAt is number &&
+             data.reporterEmail is string &&
+             data.reporterName is string;
+    }
+
+    match /bugs/{bugId} {
+      // Anyone authenticated can read bugs
+      allow read: if isAuthenticated();
+      
+      // Anyone authenticated can create a bug if it's valid and they are the reporter
+      allow create: if isAuthenticated() && 
+                    isValidBug(request.resource.data) && 
+                    request.resource.data.reporterEmail == request.auth.token.email;
+      
+      // Only admins (developers) can update status or other fields
+      // Or the owner can update their own bug (but usually status is for devs)
+      allow update: if isAdmin() && isValidBug(request.resource.data);
+      
+      // Only admins can delete
+      allow delete: if isAdmin();
+    }
+  }
+}

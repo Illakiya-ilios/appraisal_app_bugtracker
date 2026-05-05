@@ -1,0 +1,5 @@
+{
+  "name": "BugTracker Fetch System",
+  "description": "A simple bug reporting and tracking system for testers and developers to upload and manage bug reports with file attachments.",
+  "requestFramePermissions": []
+}
